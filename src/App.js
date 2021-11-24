@@ -2,7 +2,7 @@ import { Component } from 'react';
 import { Switch, Route, withRouter } from 'react-router-dom'
 // import axios from 'axios'
 import Home from './Pages/Home'
-// import Footer from './Components/Footer'
+import Footer from './Components/Footer'
 import TopNavigation from './Components/TopNavigation'
 
 class App extends Component {
@@ -42,7 +42,7 @@ class App extends Component {
             <Home geo={geoLocation} />
           </Route>
         </Switch>
-        {/* <Footer /> */}
+        <Footer />
       </div>
     );
   }

@@ -4,9 +4,13 @@ import { withStyles } from '@mui/styles';
 import { Autocomplete, TextField } from '@mui/material';
 import Helmet from 'react-helmet'
 import axios from 'axios';
+import data from './data.json';
+import _ from 'lodash';
+import { format } from 'date-fns'
+import WeatherCard from '../../Components/WeatherCard';
 const styles = (theme) => ({
   root: {
-
+    height: 'calc(100vh - 233px)'
   },
   hero: {
     height: '350px',
@@ -42,7 +46,7 @@ const styles = (theme) => ({
       fontSize: '30px',
       display: 'flex',
       width: '200px',
-      margin: 'auto',
+      margin: '20px auto',
       justifyContent: 'center',
       '& img': {
         marginRight: '10px'
@@ -51,15 +55,10 @@ const styles = (theme) => ({
   },
   weatherCardsSection: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(5, 250px)',
+    gridTemplateColumns: 'repeat(var(--columns), 250px)',
     gap: '30px',
     placeContent: 'center',
-    '& .card': {
-      height: '350px',
-      width: '100%',
-      borderRadius: 20,
-      background: '#e0e0e0'
-    }
+  
   }
 })
 
@@ -69,20 +68,22 @@ class Home extends Component {
     weather: null,
     error: null,
     loading: false,
-    searchResults: []
+    searchResults: [],
+    modalData: false
   }
   async componentDidMount() {
     try {
-      // this.setState({ loading: true })
-      // const { geo } = this.props
-      // if (geo && geo.city) {
-      //   const { REACT_APP_WEATHER_ENDPOINT, REACT_APP_WEATHER_KEY } = process.env
-      //   const response = await axios.get(`${REACT_APP_WEATHER_ENDPOINT}?q=${geo.city}&appid=${REACT_APP_WEATHER_KEY}&units=metric`)
-      //   console.log(response.data)
-      //   this.setState({ loading: false, weather: response.data })
-      // } else {
-      //   this.setState({ loading: false, error: 'We could not detect your location automatically. Please, use the search functionality to check the weather at your desired location.' })
-      // }
+      this.setState({ loading: true })
+      const { geo } = this.props
+      if (geo && geo.city) {
+        const { REACT_APP_WEATHER_ENDPOINT, REACT_APP_WEATHER_KEY } = process.env
+        // const response = await axios.get(`${REACT_APP_WEATHER_ENDPOINT}?q=${geo.city}&appid=${REACT_APP_WEATHER_KEY}&units=metric`)
+        // console.log(response.data)
+        const response = _.groupBy(data.list, i => format(new Date(i.dt_txt), 'dd.MM.yyyy'))
+        this.setState({ loading: false, weather: response })
+      } else {
+        this.setState({ loading: false, error: 'We could not detect your location automatically. Please, use the search functionality to check the weather at your desired location.' })
+      }
     } catch (err) {
       this.setState({ error: err.message, loading: false })
 
@@ -98,9 +99,13 @@ class Home extends Component {
     clearTimeout(this.searchTimerInterval)
     this.searchTimerInterval = setTimeout(() => this.search(value), 500)
   }
+  openModal = (data) => {
+    this.setState({ modalData: data })
+  }
   render() {
     const { classes, geo } = this.props
-    const { searchResults } = this.state
+    const { searchResults, weather } = this.state
+    console.log(weather)
     return (
       <div className={classes.root}>
         <Helmet>
@@ -134,16 +139,19 @@ class Home extends Component {
 
         <section className={classes.weatherResults}>
           {geo && geo.city &&
-            <div className='heading'><img src='/loc.png' width='40px' height='40px' alt='Location icon'/> {geo.city}</div>
+            <div className='heading'><img src='/loc.png' width='40px' height='40px' alt='Location icon' /> {geo.city}</div>
           }
-          <div className={classes.weatherCardsSection}>
-            <div className='card'>1</div>
-            <div className='card'>2</div>
-            <div className='card'>3</div>
-            <div className='card'>4</div>
-            <div className='card'>5</div>
+          <div className={classes.weatherCardsSection} style={{ '--columns': weather ? Object.keys(weather).length : 5 }}>
+            {weather ? Object.keys(weather).map(date => {
+              const current = weather[date][0]
+              return <WeatherCard key={date} info={current} onClick={() => this.openModal(weather[date])} />
+              
+            })
+              : null}
+
           </div>
         </section>
+
       </div>
     )
   }

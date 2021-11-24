@@ -12,3 +12,9 @@ https://geolocation-db.com/json/
 ## Weather API
 https://openweathermap.org/forecast5
 
+## Future Improvements
+ * Add more unit tests to other areas
+ * Add internationalization
+ * Remove expensive libraries like lodash
+ * Add typescript to the project
+ * Add Error Boundaries to parts that can fail
