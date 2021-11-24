@@ -1,16 +1,17 @@
 import { Component } from 'react';
-// import axios from 'axios';
 import { withStyles } from '@mui/styles';
 import { Autocomplete, TextField } from '@mui/material';
 import Helmet from 'react-helmet'
 import axios from 'axios';
-import data from './data.json';
+// import data from './data.json';
 import _ from 'lodash';
 import { format } from 'date-fns'
 import WeatherCard from '../../Components/WeatherCard';
+import OneDayWeatherModal from '../../Components/OneDayWeatherModal';
 const styles = (theme) => ({
   root: {
-    height: 'calc(100vh - 233px)'
+    height: 'calc(100vh - 233px)',
+    background: '#f5f5f5',
   },
   hero: {
     height: '350px',
@@ -46,6 +47,7 @@ const styles = (theme) => ({
       fontSize: '30px',
       display: 'flex',
       width: '200px',
+      textTransform: 'capitalize',
       margin: '20px auto',
       justifyContent: 'center',
       '& img': {
@@ -58,7 +60,7 @@ const styles = (theme) => ({
     gridTemplateColumns: 'repeat(var(--columns), 250px)',
     gap: '30px',
     placeContent: 'center',
-  
+
   }
 })
 
@@ -69,30 +71,38 @@ class Home extends Component {
     error: null,
     loading: false,
     searchResults: [],
-    modalData: false
+    modalData: false,
+    searchedCity: null
   }
   async componentDidMount() {
+    await this.getForecast()
+  }
+  async componentDidUpdate(prevProps) {
+    const { geo } = this.props
+    if (geo && prevProps.geo && geo.city !== prevProps.geo.city) {
+      await this.getForecast()
+    }
+  }
+  getForecast = async (city = false) => {
     try {
-      this.setState({ loading: true })
+      this.setState({ loading: true, weather: null })
       const { geo } = this.props
       if (geo && geo.city) {
         const { REACT_APP_WEATHER_ENDPOINT, REACT_APP_WEATHER_KEY } = process.env
-        // const response = await axios.get(`${REACT_APP_WEATHER_ENDPOINT}?q=${geo.city}&appid=${REACT_APP_WEATHER_KEY}&units=metric`)
-        // console.log(response.data)
-        const response = _.groupBy(data.list, i => format(new Date(i.dt_txt), 'dd.MM.yyyy'))
+        const payload = await axios.get(`${REACT_APP_WEATHER_ENDPOINT}?q=${city || geo.city}&appid=${REACT_APP_WEATHER_KEY}&units=metric`)
+        const response = _.groupBy(payload.data.list, i => format(new Date(i.dt_txt), 'dd.MM.yyyy'))
         this.setState({ loading: false, weather: response })
       } else {
         this.setState({ loading: false, error: 'We could not detect your location automatically. Please, use the search functionality to check the weather at your desired location.' })
       }
     } catch (err) {
       this.setState({ error: err.message, loading: false })
-
     }
   }
   search = async (value) => {
     if (value && value.length > 3) {
-      // const searchResults = await axios.get(`${REACT_APP_WEATHER_ENDPOINT}?q=${geo.city}&appid=${REACT_APP_WEATHER_KEY}&units=metric`)
-      this.setState({ searchResults: [] })
+      await this.getForecast(value)
+      this.setState({ searchedCity: value })
     }
   }
   searchForLocation = (value) => {
@@ -104,8 +114,7 @@ class Home extends Component {
   }
   render() {
     const { classes, geo } = this.props
-    const { searchResults, weather } = this.state
-    console.log(weather)
+    const { searchResults, weather, modalData, searchedCity } = this.state
     return (
       <div className={classes.root}>
         <Helmet>
@@ -132,26 +141,29 @@ class Home extends Component {
               renderInput={(params) => (
                 <TextField {...params} label={'Search for location'} variant="outlined" fullWidth />
               )}
-              renderOption={(city) => city}
+              renderOption={(data) => {
+                return data
+              }}
             />
           </div>
         </section>
 
         <section className={classes.weatherResults}>
-          {geo && geo.city &&
-            <div className='heading'><img src='/loc.png' width='40px' height='40px' alt='Location icon' /> {geo.city}</div>
+          {searchedCity || (geo && geo.city) ?
+            <div className='heading'><img src='/loc.png' width='40px' height='40px' alt='Location icon' /> {searchedCity || geo.city}</div>
+            : null
           }
           <div className={classes.weatherCardsSection} style={{ '--columns': weather ? Object.keys(weather).length : 5 }}>
             {weather ? Object.keys(weather).map(date => {
               const current = weather[date][0]
               return <WeatherCard key={date} info={current} onClick={() => this.openModal(weather[date])} />
-              
+
             })
               : null}
 
           </div>
         </section>
-
+        <OneDayWeatherModal modalData={modalData} close={() => this.setState({ modalData: null })} />
       </div>
     )
   }
