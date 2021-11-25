@@ -3,11 +3,12 @@ import { withStyles } from '@mui/styles';
 import { Autocomplete, TextField } from '@mui/material';
 import Helmet from 'react-helmet'
 import axios from 'axios';
-// import data from './data.json';
 import _ from 'lodash';
 import { format } from 'date-fns'
 import WeatherCard from '../../Components/WeatherCard';
 import OneDayWeatherModal from '../../Components/OneDayWeatherModal';
+import Loading from '../../Components/Loading';
+import NoDataView from '../../Components/NoDataView';
 const styles = (theme) => ({
   root: {
     height: 'calc(100vh - 233px)',
@@ -79,7 +80,7 @@ class Home extends Component {
   }
   async componentDidUpdate(prevProps) {
     const { geo } = this.props
-    if (geo && prevProps.geo && geo.city !== prevProps.geo.city) {
+    if (geo && !prevProps.geo) {
       await this.getForecast()
     }
   }
@@ -114,7 +115,7 @@ class Home extends Component {
   }
   render() {
     const { classes, geo } = this.props
-    const { searchResults, weather, modalData, searchedCity } = this.state
+    const { searchResults, weather, modalData, searchedCity, loading } = this.state
     return (
       <div className={classes.root}>
         <Helmet>
@@ -147,22 +148,27 @@ class Home extends Component {
             />
           </div>
         </section>
+        {weather ?
+          <section className={classes.weatherResults}>
+            {loading ? <Loading /> :
+              <>
+                {searchedCity || (geo && geo.city) ?
+                  <div className='heading'><img src='/loc.png' width='40px' height='40px' alt='Location icon' /> {searchedCity || geo.city}</div>
+                  : null
+                }
+                <div className={classes.weatherCardsSection} style={{ '--columns': weather ? Object.keys(weather).length : 5 }}>
+                  {Object.keys(weather).map(date => {
+                    const current = weather[date][0]
+                    return <WeatherCard key={date} info={current} onClick={() => this.openModal(weather[date])} />
 
-        <section className={classes.weatherResults}>
-          {searchedCity || (geo && geo.city) ?
-            <div className='heading'><img src='/loc.png' width='40px' height='40px' alt='Location icon' /> {searchedCity || geo.city}</div>
-            : null
-          }
-          <div className={classes.weatherCardsSection} style={{ '--columns': weather ? Object.keys(weather).length : 5 }}>
-            {weather ? Object.keys(weather).map(date => {
-              const current = weather[date][0]
-              return <WeatherCard key={date} info={current} onClick={() => this.openModal(weather[date])} />
-
-            })
-              : null}
-
-          </div>
-        </section>
+                  })}
+                </div>
+              </>
+            }
+          </section>
+          :
+          <NoDataView />
+        }
         <OneDayWeatherModal modalData={modalData} close={() => this.setState({ modalData: null })} />
       </div>
     )
