@@ -7,16 +7,6 @@ import TopNavigation from './Components/TopNavigation'
 
 class App extends Component {
   state = {
-    // geoLocation: {
-    //   IPv4: "31.211.142.128",
-    //   city: "Pleven",
-    //   country_code: "BG",
-    //   country_name: "Bulgaria",
-    //   latitude: 43.4167,
-    //   longitude: 24.6167,
-    //   postal: "5800",
-    //   state: "Oblast Pleven"
-    // },
     geoLocation: null,
     geoError: false,
     loading: false

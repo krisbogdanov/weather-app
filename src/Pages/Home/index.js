@@ -70,7 +70,7 @@ class Home extends Component {
   state = {
     weather: null,
     error: null,
-    loading: false,
+    loading: true,
     modalData: false,
     searchedCity: null
   }
@@ -93,10 +93,10 @@ class Home extends Component {
         const response = _.groupBy(payload.data.list, i => format(new Date(i.dt_txt), 'dd.MM.yyyy'))
         this.setState({ loading: false, weather: response })
       } else {
-        this.setState({ loading: false, error: 'We could not detect your location automatically. Please, use the search functionality to check the weather at your desired location.' })
+        this.setState({ loading: false })
       }
     } catch (err) {
-      this.setState({ error: err.message, loading: false })
+      this.setState({ error: err.message, loading: false, weather: null })
     }
   }
   search = async (value) => {
@@ -131,37 +131,38 @@ class Home extends Component {
               fullWidth
               id='search-box'
               size='small'
-              // getOptionLabel={(location) => location.city}
               options={[]}
               autoComplete={false}
               includeInputInList
               filterSelectedOptions
               renderInput={(params) => (
-                <TextField {...params} onKeyUp={(e) => this.searchForLocation(e.target.value)} onKeyDown={() => clearTimeout(this.searchTimerInterval)} label={'Search for location'} variant="outlined" fullWidth />
+                <TextField
+                  {...params}
+                  onKeyUp={(e) => this.searchForLocation(e.target.value)}
+                  onKeyDown={() => clearTimeout(this.searchTimerInterval)}
+                  label={'Search for location'}
+                  variant="outlined"
+                  fullWidth
+                />
               )}
             />
           </div>
         </section>
         {weather ?
           <section className={classes.weatherResults}>
-            {loading ? <Loading /> :
-              <>
-                {searchedCity || (geo && geo.city) ?
-                  <div className='heading'><img src='/loc.png' width='40px' height='40px' alt='Location icon' /> {searchedCity || geo.city}</div>
-                  : null
-                }
-                <div className={classes.weatherCardsSection} style={{ '--columns': weather ? Object.keys(weather).length : 5 }}>
-                  {Object.keys(weather).map(date => {
-                    const current = weather[date][0]
-                    return <WeatherCard key={date} info={current} onClick={() => this.openModal(weather[date])} />
-
-                  })}
-                </div>
-              </>
+            {searchedCity || (geo && geo.city) ?
+              <div className='heading'><img src='/loc.png' width='40px' height='40px' alt='Location icon' /> {searchedCity || geo.city}</div>
+              : null
             }
+            <div className={classes.weatherCardsSection} style={{ '--columns': weather ? Object.keys(weather).length : 5 }}>
+              {Object.keys(weather).map(date => {
+                const current = weather[date][0]
+                return <WeatherCard key={date} info={current} onClick={() => this.openModal(weather[date])} />
+
+              })}
+            </div>
           </section>
-          :
-          <NoDataView />
+          : loading ? <Loading /> : <NoDataView />
         }
         {modalData ? <OneDayWeatherModal modalData={modalData} close={() => this.setState({ modalData: null })} /> : null}
       </div>

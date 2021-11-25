@@ -1,4 +1,4 @@
-# weather-app
+# Weather App Ltd.
 
 ## Node >= 12.0.0 is the minimum requirement to be able to install successfully dependencies
 ## Libraries
