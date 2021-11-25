@@ -55,7 +55,7 @@ export default function WeatherCard({ info = false, onClick = () => { } }) {
       <div className='temp'>
         <span className='min'>{parseFloat(main.temp).toFixed(0)} &#8451;</span>
       </div>
-      <div className='wind'><img src='/wind.jpg' width='20' height='15' alt='wind' />{wind ? wind.speed : null} m/s</div>
+      <div className='wind'>{wind ? <> <img src='/wind.jpg' width='20' height='15' alt='wind' /> {wind.speed} m/s </> : null}</div>
       <div className='condition'>{weather[0] ? weather[0].description : null}</div>
     </div>
   )

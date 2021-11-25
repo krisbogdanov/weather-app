@@ -9,7 +9,7 @@ import WeatherCard from '../../Components/WeatherCard';
 import OneDayWeatherModal from '../../Components/OneDayWeatherModal';
 import Loading from '../../Components/Loading';
 import NoDataView from '../../Components/NoDataView';
-const styles = (theme) => ({
+const styles = () => ({
   root: {
     height: 'calc(100vh - 233px)',
     background: '#f5f5f5',
@@ -85,9 +85,9 @@ class Home extends Component {
   }
   getForecast = async (city = false) => {
     try {
-      this.setState({ loading: true, weather: null })
+      this.setState({ loading: true })
       const { geo } = this.props
-      if (geo && geo.city) {
+      if ((geo && geo.city) || city) {
         const { REACT_APP_WEATHER_ENDPOINT, REACT_APP_WEATHER_KEY } = process.env
         const payload = await axios.get(`${REACT_APP_WEATHER_ENDPOINT}?q=${city || geo.city}&appid=${REACT_APP_WEATHER_KEY}&units=metric`)
         const response = _.groupBy(payload.data.list, i => format(new Date(i.dt_txt), 'dd.MM.yyyy'))
@@ -129,16 +129,15 @@ class Home extends Component {
             <div className='label'>Check the weather for other locations</div>
             <Autocomplete
               fullWidth
+              id='search-box'
               size='small'
-              getOptionLabel={(location) => location.city}
+              // getOptionLabel={(location) => location.city}
               options={[]}
               autoComplete={false}
               includeInputInList
               filterSelectedOptions
-              onKeyUp={(e) => this.searchForLocation(e.target.value)}
-              onKeyDown={() => clearTimeout(this.searchTimerInterval)}
               renderInput={(params) => (
-                <TextField {...params} label={'Search for location'} variant="outlined" fullWidth />
+                <TextField {...params} onKeyUp={(e) => this.searchForLocation(e.target.value)} onKeyDown={() => clearTimeout(this.searchTimerInterval)} label={'Search for location'} variant="outlined" fullWidth />
               )}
             />
           </div>
@@ -164,7 +163,7 @@ class Home extends Component {
           :
           <NoDataView />
         }
-        <OneDayWeatherModal modalData={modalData} close={() => this.setState({ modalData: null })} />
+        {modalData ? <OneDayWeatherModal modalData={modalData} close={() => this.setState({ modalData: null })} /> : null}
       </div>
     )
   }

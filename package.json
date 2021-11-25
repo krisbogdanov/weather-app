@@ -26,6 +26,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "test:no-watchman": "react-scripts test --no-watchman --coverage",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -63,5 +64,8 @@
     "coverageReporters": [
       "text"
     ]
+  },
+  "devDependencies": {
+    "jest-mock-axios": "^4.4.1"
   }
 }
