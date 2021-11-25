@@ -71,7 +71,6 @@ class Home extends Component {
     weather: null,
     error: null,
     loading: false,
-    searchResults: [],
     modalData: false,
     searchedCity: null
   }
@@ -115,7 +114,7 @@ class Home extends Component {
   }
   render() {
     const { classes, geo } = this.props
-    const { searchResults, weather, modalData, searchedCity, loading } = this.state
+    const { weather, modalData, searchedCity, loading } = this.state
     return (
       <div className={classes.root}>
         <Helmet>
@@ -132,19 +131,15 @@ class Home extends Component {
               fullWidth
               size='small'
               getOptionLabel={(location) => location.city}
-              options={searchResults}
-              autoComplete
+              options={[]}
+              autoComplete={false}
               includeInputInList
               filterSelectedOptions
               onKeyUp={(e) => this.searchForLocation(e.target.value)}
               onKeyDown={() => clearTimeout(this.searchTimerInterval)}
-              className={classes.searchInput}
               renderInput={(params) => (
                 <TextField {...params} label={'Search for location'} variant="outlined" fullWidth />
               )}
-              renderOption={(data) => {
-                return data
-              }}
             />
           </div>
         </section>
