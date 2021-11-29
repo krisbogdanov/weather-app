@@ -24,6 +24,7 @@ class App extends Component {
   }
   render() {
     const { geoLocation } = this.state
+    console.log('App re-render')
     return (
       <div>
         <TopNavigation />
