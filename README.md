@@ -5,10 +5,15 @@
  * React Create App
  * Material UI
 
-### To run it localy: npm/yarn start
-### To test it: npm/yarn test
-If you experience issues and the tests do not start the interactive mode please run: npm/yarn run test:no-watchman
-### To build it: npm/yarn build
+## To run it localy
+ * npm/yarn start
+## To test it:
+ * npm/yarn test
+ * If you experience issues and the tests do not start the interactive mode please run: npm/yarn run test:no-watchman
+## To build it
+ * npm/yarn build
+
+
 ## Geo location API 
 https://geolocation-db.com/json/
 
